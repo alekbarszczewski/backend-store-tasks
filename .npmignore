@@ -1,0 +1,6 @@
+test/
+coverage/
+.nyc_output
+.gitignore
+.nycrc
+backend-store*.tgz
