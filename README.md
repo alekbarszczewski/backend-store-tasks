@@ -84,6 +84,8 @@ Default job options are as follows:
 You can override them with `options.defaultJobOptions`.  
 All available options are [here](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queueadd).
 
+---
+
 ### Store#createTask (method, payload, context, options) => Promise\<void\>
 
 Create background task. It takes same options as [Store#dispatch](https://alekbarszczewski.github.io/backend-store/#/store?id=dispatchmethod-payload-context-options) method and
@@ -99,6 +101,8 @@ additionally it supports options.jobOptions (see below).
 
 Returns promise which is resolved as soon as task is saved to Redis.
 
+---
+
 ### Store#processTasks(taskName, options) => void
 
 Starts listening and processing of tasks of given type (type is actually method name).
@@ -108,11 +112,14 @@ Starts listening and processing of tasks of given type (type is actually method 
 | taskName (required) | method name or `"*"` to process all tasks
 | options.concurrency | defaults to 1
 
+---
 
 ### Store#stopProcessingTasks() => Promise\<void\>
 
 Closes Redis connection used by bull. Useful for graceful shutdown.  
 Returns promise that resolves when connection is closed.
+
+---
 
 ### methodContext#createTask (method, payload, options) => Promise\<void\>
 
@@ -126,3 +133,5 @@ additionally it supports options.jobOptions (see below).
 | options.jobOptions | bull job options (see [all available options](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queueadd))
 
 Returns promise which is resolved as soon as task is saved to Redis.
+
+---
