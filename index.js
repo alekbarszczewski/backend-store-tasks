@@ -11,6 +11,8 @@ function backendStoreTasksPlugin (store, options) {
     ...options.defaultJobOptions
   }
 
+  const transformContext = options.transformContext || ((context) => context)
+
   const createTask = function createTask ({
     method,
     payload,
@@ -21,12 +23,22 @@ function backendStoreTasksPlugin (store, options) {
     return queue.add(method, {
       method,
       payload,
-      context,
+      context: transformContext(context),
       cid
     }, {
       ...defaultJobOptions,
       ...jobOptions
     })
+      .catch(err => {
+        if (err.message.match(/circular structure to JSON/i)) {
+          throw new Error(`
+            Error during serialization of payload or context: ${err.message}.
+            For context serialization please refer to options.transformContext option of backend-store-tasks plugin
+          `)
+        } else {
+          throw err
+        }
+      })
   }
 
   store.use(async function backendStoreTasksMiddleware (payload, middlewareContext, next) {

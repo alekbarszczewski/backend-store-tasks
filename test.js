@@ -113,6 +113,68 @@ describe('store#createTask', () => {
       method: 'task1'
     })
   })
+
+  it('support transformContext option', async () => {
+    usePlugin(store, {
+      transformContext (context) {
+        return { user: context.user }
+      }
+    })
+    const payload = { a: 123 }
+    const context = { key: 'value', user: { id: 1 } }
+    const options = { cid: 'abc' }
+    await store.createTask('task1', payload, context, options)
+    const jobs = await getAllJobs()
+    expect(jobs.length).to.equal(1)
+    expect(jobs[0].data).to.eql({
+      method: 'task1',
+      payload,
+      context: { user: context.user },
+      cid: 'abc'
+    })
+    expect(jobs[0].opts).to.include(defaultJobOptions)
+  })
+
+  it('return correct error on circular payload, context', async () => {
+    usePlugin(store)
+    const payload = {}
+    payload.payload = payload
+    const context = {}
+    context.context = context
+    let err1
+    let err2
+    try {
+      await store.createTask('task1', payload)
+    } catch (err) {
+      err1 = err
+    }
+
+    expect(err1).to.match(/Error during serialization of payload or context/i)
+
+    try {
+      await store.createTask('task1', null, context)
+    } catch (err) {
+      err2 = err
+    }
+
+    expect(err2).to.match(/Error during serialization of payload or context/i)
+  })
+
+  // it('throw error', async () => {
+  //   store.plugin(backendStoreTasks, {
+  //     redisUrl: 'redis://invalid:1234',
+  //     queueOptions: {
+  //
+  //     }
+  //   })
+  //   let err1
+  //   try {
+  //     await store.createTask('task1')
+  //   } catch (err) {
+  //     err1 = err
+  //   }
+  //   console.log(err1)
+  // })
 })
 
 describe('methodContext#createTask', () => {
@@ -197,6 +259,32 @@ describe('methodContext#createTask', () => {
     expect(jobs[0].data).to.eql({
       method: 'task1',
       context,
+      cid
+    })
+    expect(jobs[0].opts).to.include(defaultJobOptions)
+  })
+
+  it('support transformContext option', async () => {
+    usePlugin(store, {
+      transformContext (context) {
+        return { user: context.user }
+      }
+    })
+
+    const context = { key: 'value', user: { id: 1 } }
+    let cid
+
+    store.define('api', async (parentPayload, methodContext) => {
+      cid = methodContext.cid
+      await methodContext.createTask('task1')
+    })
+    await store.dispatch('api', null, context)
+
+    const jobs = await getAllJobs()
+    expect(jobs.length).to.equal(1)
+    expect(jobs[0].data).to.eql({
+      method: 'task1',
+      context: { user: context.user },
       cid
     })
     expect(jobs[0].opts).to.include(defaultJobOptions)

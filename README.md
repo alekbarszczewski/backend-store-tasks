@@ -91,13 +91,34 @@ All available options are [here](https://github.com/OptimalBits/bull/blob/master
 Create background task. It takes same options as [Store#dispatch](https://alekbarszczewski.github.io/backend-store/#/store?id=dispatchmethod-payload-context-options) method and
 additionally it supports options.jobOptions (see below).
 
-| argument           | Description
-|--------------------|----------------
-| method (required)  | method name
-| payload            | method payload
-| context            | context
-| options.cid        | same as cid option passed to [Store#dispatch](https://alekbarszczewski.github.io/backend-store/#/store?id=dispatchmethod-payload-context-options)
-| options.jobOptions | bull job options (see [all available options](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queueadd))
+| argument                 | Description
+|--------------------------|----------------
+| method (required)        | method name
+| payload                  | method payload
+| context                  | context
+| options.cid              | same as cid option passed to [Store#dispatch](https://alekbarszczewski.github.io/backend-store/#/store?id=dispatchmethod-payload-context-options)
+| options.jobOptions       | bull job options (see [all available options](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queueadd))
+| options.transformContext | optional function to transform context passed to task (see below)
+
+**options.transformContext**
+
+Function of type `(context: any) => any`.
+When this option is set this function is used to transform context before saving task to Redis.
+This is useful if context is not serializable, for example it has circullar dependency.
+If for example you want to pass only user to background tasks use it like this:
+
+```js
+store.plugin(backendStoreTasks, {
+  redisUrl: process.env.REDIS_URL,
+
+  transformContext (context) {
+    // pick only "user" from context
+    return context
+      ? { user: context.user || null }
+      : context
+  }
+})
+```
 
 Returns promise which is resolved as soon as task is saved to Redis.
 
