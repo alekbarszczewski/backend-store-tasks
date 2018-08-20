@@ -75,7 +75,7 @@ describe('store#createTask', () => {
   })
 
   it('create task with custom options', async () => {
-    usePlugin(store)
+    usePlugin(store, { queueName: 'abc' })
     const payload = { a: 123 }
     const context = { b: 456 }
     const options = {

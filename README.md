@@ -67,6 +67,7 @@ setInterval(async () => {
 | options.redisUrl (required) | Redis URL (for example redis://redis:pass@localhost)
 | options.queueOptions        | options passed to bull Queue (see options [here](https://github.com/OptimalBits/bull/blob/master/REFERENCE.md#queue))
 | options.defaultJobOptions   | default options used when creating bull job (see below)
+| options.queueName           | defaults to "default_queue"
 
 **options.defaultJobOptions**
 

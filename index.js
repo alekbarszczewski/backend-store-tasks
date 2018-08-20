@@ -1,7 +1,8 @@
 const Queue = require('bull')
 
 function backendStoreTasksPlugin (store, options) {
-  const queue = new Queue(options.redisUrl, options.queueOptions)
+  const queueName = options.queueName || 'default_queue'
+  const queue = new Queue(queueName, options.redisUrl, options.queueOptions)
 
   const defaultJobOptions = {
     attempts: 3,
